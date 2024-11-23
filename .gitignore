@@ -1,0 +1,37 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.env
+
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Node modules
+node_modules/
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+*~
+
+# Build files
+dist/
+build/
+
+# Sass
+.sass-cache/
+*.css.map
+
+# StarsMedia Development workflow
+treetamer.sh
+tamed_tree/
