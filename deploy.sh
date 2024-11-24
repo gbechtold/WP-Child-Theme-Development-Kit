@@ -170,8 +170,90 @@ EOL
     echo -e "${GREEN}Setup completed successfully!${NC}"
 }
 
+# Function to parse .gitignore and create rsync exclude patterns
+create_exclude_patterns() {
+    local exclude_file="$TEMP_DIR/exclude-patterns.txt"
+    
+    # Start with default excludes
+    cat > "$exclude_file" << EOL
+.git
+.gitignore
+*/.gitignore
+node_modules
+.env*
+deploy.sh
+.DS_Store
+*/.DS_Store
+treetamer.sh
+readme.md
+EOL
+
+    # If .gitignore exists, append its contents
+    if [ -f ".gitignore" ]; then
+        # Process .gitignore and append to exclude file
+        # Remove comments and empty lines, and format for rsync
+        grep -v '^#' .gitignore | grep -v '^\s*$' >> "$exclude_file"
+    fi
+    
+    echo "$exclude_file"
+}
+
+# Function to copy files while respecting exclusions
+copy_with_exclusions() {
+    local source_dir="$1"
+    local target_dir="$2"
+    local exclude_file="$3"
+    
+    # Create temporary directory for filtered content
+    mkdir -p "$target_dir"
+    
+    # Use rsync to copy files while excluding patterns
+    rsync -a --exclude-from="$exclude_file" "$source_dir/" "$target_dir/"
+}
+
+# Function to deploy via FTP
+deploy_ftp() {
+    echo -e "${BLUE}Deploying to FTP...${NC}"
+    
+    # Create temporary directories
+    TEMP_DIR=$(mktemp -d)
+    FILTERED_DIR="$TEMP_DIR/filtered"
+    
+    # Create exclude patterns file
+    EXCLUDE_FILE=$(create_exclude_patterns)
+    
+    echo -e "${YELLOW}Creating filtered copy of theme...${NC}"
+    copy_with_exclusions "." "$FILTERED_DIR" "$EXCLUDE_FILE"
+    
+    echo -e "${YELLOW}Uploading files to FTP server...${NC}"
+    # Upload files
+    lftp -c "
+        set ftp:ssl-allow no;
+        open -u $FTP_USER,$FTP_PASS $FTP_HOST;
+        lcd $FILTERED_DIR;
+        cd $REMOTE_PATH;
+        mirror --reverse --delete --verbose
+    "
+    
+    # Cleanup
+    cd - > /dev/null
+    rm -rf "$TEMP_DIR"
+    
+    echo -e "${GREEN}Deployment completed successfully!${NC}"
+}
+
 # Function to validate environment variables
 validate_env() {
+    # Check for required commands
+    local required_commands=("rsync" "lftp")
+    for cmd in "${required_commands[@]}"; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            echo -e "${RED}Error: Required command '$cmd' is not installed${NC}"
+            echo "Please install it using your package manager"
+            exit 1
+        fi
+    done
+
     if [ ! -f ".env" ]; then
         echo -e "${RED}Error: .env file not found!${NC}"
         echo "Please run the setup first: ./deploy.sh --setup"
@@ -214,32 +296,6 @@ create_backup() {
         
         echo -e "${GREEN}Backup created: $BACKUP_FILE${NC}"
     fi
-}
-
-# Function to deploy via FTP
-deploy_ftp() {
-    echo -e "${BLUE}Deploying to FTP...${NC}"
-    
-    TEMP_DIR=$(mktemp -d)
-    cp -r . "$TEMP_DIR"
-    cd "$TEMP_DIR"
-    
-    # Remove development files
-    rm -rf .git .gitignore node_modules .env* deploy.sh
-    
-    # Upload files
-    lftp -c "
-        set ftp:ssl-allow no;
-        open -u $FTP_USER,$FTP_PASS $FTP_HOST;
-        lcd $TEMP_DIR;
-        cd $REMOTE_PATH;
-        mirror --reverse --delete --verbose
-    "
-    
-    cd - > /dev/null
-    rm -rf "$TEMP_DIR"
-    
-    echo -e "${GREEN}Deployment completed successfully!${NC}"
 }
 
 # Main execution
