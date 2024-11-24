@@ -215,6 +215,9 @@ copy_with_exclusions() {
 deploy_ftp() {
     echo -e "${BLUE}Deploying to FTP...${NC}"
     
+    # Store the original directory
+    ORIGINAL_DIR=$(pwd)
+    
     # Create temporary directories
     TEMP_DIR=$(mktemp -d)
     FILTERED_DIR="$TEMP_DIR/filtered"
@@ -227,6 +230,7 @@ deploy_ftp() {
     
     echo -e "${YELLOW}Uploading files to FTP server...${NC}"
     # Upload files
+    cd "$FILTERED_DIR"
     lftp -c "
         set ftp:ssl-allow no;
         open -u $FTP_USER,$FTP_PASS $FTP_HOST;
@@ -235,8 +239,8 @@ deploy_ftp() {
         mirror --reverse --delete --verbose
     "
     
-    # Cleanup
-    cd - > /dev/null
+    # Return to original directory and cleanup
+    cd "$ORIGINAL_DIR"
     rm -rf "$TEMP_DIR"
     
     echo -e "${GREEN}Deployment completed successfully!${NC}"
