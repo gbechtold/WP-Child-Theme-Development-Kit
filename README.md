@@ -1,41 +1,55 @@
-# 🎨 WordPress Child Theme Development Kit
+# WP-Theme-Dev
 
-A streamlined toolkit for WordPress child theme development, optimized for use with Bricks Builder.
+A professional WordPress theme development toolkit focused on efficiency and clean deployment, optimized for Bricks Builder child themes.
 
-## ⚡ Quick Install
+## 🚀 Features
 
-```bash
-curl -s https://raw.githubusercontent.com/your-username/wp-child-dev/main/install.sh | bash
-```
-
-## 🌟 Features
-
-- Automated FTP deployment with smart file exclusion
+- Automated FTP deployment with smart file filtering
+- Intelligent `.gitignore` handling for clean deployments
 - Backup management with rotation
 - Custom elements support for Bricks Builder
-- Development workflow optimization
 - Environment-based configuration
-- Intelligent .gitignore parsing
+- Development workflow optimization
 - Clean project structure
 - Secure credential management
 
-## 📋 Prerequisites
+## 📋 Requirements
 
 - WordPress 6.0+
 - Bricks Builder 1.8+
 - PHP 7.4+
-- Local development environment
-- FTP access to your production server
 - Required tools:
   - `rsync`
   - `lftp`
   - `curl` or `wget`
 
-## 🗂️ Project Structure
+## 🛠️ Installation
+
+1. Navigate to your WordPress themes directory:
+   ```bash
+   cd wp-content/themes/
+   ```
+
+2. Create your child theme directory:
+   ```bash
+   mkdir your-child-theme && cd your-child-theme
+   ```
+
+3. Download and run the setup script:
+   ```bash
+   curl -O https://raw.githubusercontent.com/gbechtold/WP-Theme-Dev/main/deploy.sh && chmod +x deploy.sh
+   ```
+
+4. Run initial setup:
+   ```bash
+   ./deploy.sh --setup
+   ```
+
+## 📁 Project Structure
 
 ```
 your-child-theme/
-├── .env                 # Configuration (created from setup)
+├── .env                 # Configuration (auto-generated)
 ├── .gitignore          # Version control exclusions
 ├── assets/             # Theme assets (images, fonts, etc.)
 ├── elements/           # Custom Bricks elements
@@ -46,44 +60,54 @@ your-child-theme/
 └── README.md          # Documentation
 ```
 
-## 🛠️ Setup & Usage
+## 🔧 Configuration
 
-1. **Initial Setup**
-   ```bash
-   ./deploy.sh --setup
-   ```
-   This will:
-   - Create necessary directories
-   - Generate configuration files
-   - Set up deployment settings
-   - Configure backup options
+During setup, you'll be prompted for:
+- FTP host, username, and password
+- Theme name and details
+- Remote deployment path
+- Backup preferences
 
-2. **Configuration**
-   - During setup, you'll be prompted for:
-     - FTP credentials
-     - Theme details
-     - Deployment paths
-     - Backup preferences
+These settings are stored in `.env`:
+```bash
+# FTP Configuration
+FTP_HOST=your-domain.com
+FTP_USER=your-username
+FTP_PASS=your-password
+FTP_PORT=21
 
-3. **Development**
-   - Add custom elements in `/elements/`
-   - Add template parts in `/template-parts/`
-   - Add assets in `/assets/`
-   - Modify `style.css` for theme styles
-   - Update `functions.php` for custom functionality
+# Theme Configuration
+THEME_NAME=your-theme-name
+REMOTE_PATH=/public_html/wp-content/themes/your-theme
 
-4. **Deployment**
-   ```bash
-   ./deploy.sh --deploy
-   ```
-   This will:
-   - Create a backup (if enabled)
-   - Parse .gitignore for exclusions
-   - Filter out development files
-   - Deploy to FTP server
-   - Maintain clean production environment
+# Backup Configuration
+ENABLE_BACKUPS=true
+BACKUP_DIR=../backups
+KEEP_BACKUPS=5
+```
 
-## 📚 Custom Elements
+## 📤 Deployment
+
+Deploy your theme:
+```bash
+./deploy.sh --deploy
+```
+
+The deployment script:
+1. Creates a backup (if enabled)
+2. Parses your `.gitignore` for exclusions
+3. Filters out development files
+4. Uploads clean files to your FTP server
+
+### Excluded Files
+The following files are automatically excluded from deployment:
+- All patterns from `.gitignore`
+- Development files (`.git`, `node_modules`, etc.)
+- Configuration files (`.env`, `deploy.sh`)
+- Documentation files (`readme.md`)
+- System files (`.DS_Store`)
+
+## 🧩 Custom Elements
 
 Add custom Bricks elements in the `elements/` directory:
 
@@ -96,8 +120,6 @@ class Element_Custom_Title extends \Bricks\Element {
     public function get_label() {
         return esc_html__('Custom Title', 'bricks');
     }
-    
-    // Add your element logic here
 }
 ```
 
@@ -106,12 +128,24 @@ class Element_Custom_Title extends \Bricks\Element {
 - FTP credentials are stored locally in `.env`
 - Sensitive files are automatically excluded from deployment
 - Backups are stored outside the public directory
-- Development files are never uploaded to production
+- Development files never reach production
+- Clean separation of development and production environments
+
+## 🛟 Support
+
+For issues and feature requests:
+1. Check the [issues page](https://github.com/gbechtold/WP-Theme-Dev/issues)
+2. Open a new issue if needed
+3. Provide detailed information about your problem
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add: Amazing Feature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📝 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-
-## 🆘 Support
-
-For issues and feature requests, please [open an issue](https://github.com/your-username/wp-child-dev/issues) on GitHub.
